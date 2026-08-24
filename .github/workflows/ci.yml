@@ -7,7 +7,10 @@ permissions:
   packages: read
 jobs:
   ci:
+    # The template itself has no lockfile and its __DATASET__ dependency does
+    # not resolve, so npm ci cannot succeed here. Websites created from the
+    # template have a different repository name and do run these checks.
+    if: github.repository != 'metanull/website-template'
     uses: metanull/viewer-workflows/.github/workflows/website-ci.yml@v1
-    secrets: inherit
   locales:
     uses: metanull/viewer-workflows/.github/workflows/locale-validate.yml@v1
