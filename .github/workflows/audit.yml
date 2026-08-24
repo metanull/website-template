@@ -1,0 +1,12 @@
+name: Scheduled audit
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  audit:
+    uses: metanull/viewer-workflows/.github/workflows/audit-scheduled.yml@v1
+    secrets: inherit
