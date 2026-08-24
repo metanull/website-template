@@ -26,23 +26,37 @@ combines three `@metanull` packages from GitHub Packages:
    - `vite.config.js` — the `@inventory-data` alias path
    - `src/dataset.config.js` — `datasetPackage`, `siteName`, `navigation.headerTitle`
    - `index.html` — the `<title>`
-3. **Generate the lockfile.** Run `npm install` once (any machine with the
-   read token in `NODE_AUTH_TOKEN`, or the Docker container below) and commit
+3. **Grant the new repo access to the dataset package.** On the package page
+   (`github.com/users/metanull/packages/npm/package/<dataset>-data`) →
+   **Package settings → Manage Actions access → Add repository** → the new
+   repo, role **Read**. This is what lets CI install a **private** dataset
+   with its built-in `github.token`; no secret and no PAT is involved. The
+   grant is UI-only, and only affects workflow runs *started after* it — a run
+   that already failed with `403 permission_denied: read_package` has to be
+   re-run.
+4. **Generate the lockfile.** Run `npm install` once (any machine logged in to
+   GitHub Packages, or the Docker container below) and commit
    `package-lock.json` — CI uses `npm ci` and needs it.
-4. **Switch on the rails** in the new repo's settings:
+5. **Switch on the rails** in the new repo's settings:
    - **Pages** → Build and deployment → Source: **GitHub Actions**.
    - **Ruleset** for `main`: require pull requests + required status checks
      (copy the ruleset of an existing website repo).
    - **General → Allow auto-merge** (needed by the translator flow and Dependabot).
    - **CodeQL** (Security → Code scanning) and Dependabot alerts.
-   - Optional secret `PACKAGES_READ_TOKEN` (PAT with `read:packages`): only
-     required once the repo consumes a **private** package; public packages
-     work with the built-in token.
-5. **Register the website for downstream testing:** add `"metanull/<dataset>"`
-   to `dependents.json` in both `viewer-core` and `viewer-layout`.
-6. **Update `.github/CODEOWNERS`** with the real reviewers.
-7. **Merge the first PR** (the placeholder replacement). The deploy workflow
+6. **Register the website for downstream testing:** add `"metanull/<dataset>"`
+   to `dependents.json` in both `viewer-core` and `viewer-layout`, and grant
+   those two repos **Read** on the dataset package as well (step 3) — their
+   downstream job installs it.
+7. **Update `.github/CODEOWNERS`** with the real reviewers.
+8. **Merge the first PR** (the placeholder replacement). The deploy workflow
    publishes the site to `https://metanull.github.io/<dataset>/`.
+
+The CI, deploy and audit workflows carry an
+`if: github.repository != 'metanull/website-template'` guard so the template
+itself — which has no lockfile and an unresolvable `__DATASET__` dependency —
+does not report failing checks. The condition is false in every repository
+created from the template, so the checks simply run; there is nothing to
+remove.
 
 The deployed base path comes from the `BASE_PATH` environment variable at
 build time; the deploy workflow defaults it to `/<repo>/` for Pages. For a
@@ -92,9 +106,10 @@ For real design work, use the live preview:
      (desktop.github.com), each with default settings.
    - In GitHub Desktop: File → Clone repository → pick this website's repo.
    - In the cloned folder, copy the file `.env.example` to a new file named
-     exactly `.env`, open it in any text editor and paste the token the admin
-     gave you after `NODE_AUTH_TOKEN=`. This token only lets your computer
-     download the website's building blocks; never share or commit it.
+     exactly `.env`, open it in any text editor and paste your personal
+     GitHub token after `NODE_AUTH_TOKEN=` (the admin will tell you how to
+     create one). It only lets your own computer download the website's
+     building blocks; it is personal, never shared and never committed.
 2. **Start the preview:** open a terminal in the folder (GitHub Desktop:
    Repository → Open in Command Prompt) and run:
 
