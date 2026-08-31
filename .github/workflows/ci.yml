@@ -9,7 +9,9 @@ jobs:
   ci:
     # The template itself has no lockfile and its __DATASET__ dependency does
     # not resolve, so npm ci cannot succeed here. Websites created from the
-    # template have a different repository name and do run these checks.
+    # template have a different repository name and do run these checks — where
+    # the preinstall check additionally fails the install if a placeholder was
+    # left behind in a file npm does not read.
     if: github.repository != 'metanull/website-template'
     uses: metanull/viewer-workflows/.github/workflows/website-ci.yml@v1.4.1
   locales:
