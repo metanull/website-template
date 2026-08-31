@@ -105,11 +105,10 @@ For real design work, use the live preview:
    - Install **Docker Desktop** (docker.com) and **GitHub Desktop**
      (desktop.github.com), each with default settings.
    - In GitHub Desktop: File → Clone repository → pick this website's repo.
-   - In the cloned folder, copy the file `.env.example` to a new file named
-     exactly `.env`, open it in any text editor and paste your personal
-     GitHub token after `NODE_AUTH_TOKEN=` (the admin will tell you how to
-     create one). It only lets your own computer download the website's
-     building blocks; it is personal, never shared and never committed.
+   - Sign in to GitHub Packages once, in a terminal:
+     `npm login --registry=https://npm.pkg.github.com --scope=@metanull`.
+     That login stays on your own computer, and the preview reads it. Nothing
+     in this repository holds a token.
 2. **Start the preview:** open a terminal in the folder (GitHub Desktop:
    Repository → Open in Command Prompt) and run:
 
