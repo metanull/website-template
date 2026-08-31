@@ -43,10 +43,13 @@ combines three `@metanull` packages from GitHub Packages:
      (copy the ruleset of an existing website repo).
    - **General → Allow auto-merge** (needed by the translator flow and Dependabot).
    - **CodeQL** (Security → Code scanning) and Dependabot alerts.
-6. **Register the website for downstream testing:** add `"metanull/<dataset>"`
-   to `dependents.json` in both `viewer-core` and `viewer-layout`, and grant
-   those two repos **Read** on the dataset package as well (step 3) — their
-   downstream job installs it.
+6. **Grant `viewer-core` and `viewer-layout` Read on the dataset package** as
+   well (step 3). Their CI builds every website against the package being
+   released, so they install this dataset too.
+
+   There is nothing to register: a website is discovered from the
+   `website-template` link GitHub records when the repository is created, so it
+   becomes a downstream consumer the moment it exists.
 7. **Update `.github/CODEOWNERS`** with the real reviewers.
 8. **Merge the first PR** (the placeholder replacement). The deploy workflow
    publishes the site to `https://metanull.github.io/<dataset>/`.
@@ -145,13 +148,17 @@ For real design work, use the live preview:
 - CI (`.github/workflows/`) is a set of thin callers of
   [`metanull/viewer-workflows`](https://github.com/metanull/viewer-workflows);
   build + test block, ESLint + `npm audit` report, locale PRs validate and
-  auto-merge, Dependabot minor/patch bumps of the platform packages
   auto-merge, a weekly audit opens issues on findings.
-- Those callers pin an **exact** `viewer-workflows` version (`@v1.3.0`), never
-  a moving major tag. Do not "simplify" them to `@v1`: that tag is frozen at
-  v1.1.2 and force-moving it would deploy unverified CI to every website at
-  once. New releases arrive as a Dependabot pull request — the
-  `github-actions` ecosystem in `.github/dependabot.yml` covers
-  reusable-workflow refs — so this site's own CI validates a release before it
-  is adopted, and green minor/patch bumps auto-merge. The reasoning lives in
-  the viewer-workflows README's Versioning section.
+- Those callers pin an **exact** `viewer-workflows` version, never a moving
+  major tag. Do not "simplify" them to `@v1`: that tag is frozen at v1.1.2 and
+  force-moving it would deploy unverified CI to every website at once. New
+  releases arrive as a Dependabot pull request — the `github-actions` ecosystem
+  covers reusable-workflow refs — so this site's own CI validates a release
+  before it is adopted, and green minor/patch bumps auto-merge.
+- **`@metanull` npm packages are not managed by Dependabot.** GitHub Packages
+  requires a token for every install, including of a public package, and
+  Dependabot has no route to one — so `.github/dependabot.yml` ignores that
+  scope and it is propagated by the operator instead. Dependabot still keeps
+  third-party dependencies and GitHub Actions current, which both resolve fine.
+  The procedure, and the reasoning, are in
+  [MAINTENANCE.md](https://github.com/metanull/viewer-workflows/blob/main/MAINTENANCE.md).
