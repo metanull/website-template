@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "preinstall": "node scripts/check-placeholders.js",
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run",
     "lint": "eslint ."
   },
   "dependencies": {
-    "@metanull/__DATASET__-data": "^1.0.0",
+    "@metanull/__DATASET__-data": "0.0.0-REPLACE-ME",
     "@metanull/viewer-core": "^1.0.0",
     "@metanull/viewer-layout": "^1.0.0",
     "marked": "^18.0.0",

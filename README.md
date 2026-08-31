@@ -26,6 +26,11 @@ combines three `@metanull` packages from GitHub Packages:
    - `vite.config.js` — the `@inventory-data` alias path
    - `src/dataset.config.js` — `datasetPackage`, `siteName`, `navigation.headerTitle`
    - `index.html` — the `<title>`
+
+   Leave the dataset dependency's *version* (`0.0.0-REPLACE-ME`) alone — step 4
+   sets it. A half-configured copy cannot reach CI: npm itself refuses a
+   dependency still named or versioned after a placeholder, and a `preinstall`
+   check refuses the rest, naming the files you still have to edit.
 3. **Grant the new repo access to the dataset package.** On the package page
    (`github.com/users/metanull/packages/npm/package/<dataset>-data`) →
    **Package settings → Manage Actions access → Add repository** → the new
@@ -34,9 +39,17 @@ combines three `@metanull` packages from GitHub Packages:
    grant is UI-only, and only affects workflow runs *started after* it — a run
    that already failed with `403 permission_denied: read_package` has to be
    re-run.
-4. **Generate the lockfile.** Run `npm install` once (any machine logged in to
-   GitHub Packages, or the Docker container below) and commit
-   `package-lock.json` — CI uses `npm ci` and needs it.
+4. **Install the dataset.** On any machine logged in to GitHub Packages (or in
+   the Docker container below), run
+
+   ```
+   npm install @metanull/<dataset>-data@latest
+   ```
+
+   and commit `package-lock.json` — CI uses `npm ci` and needs it. Use
+   `@latest` rather than a bare `npm install`: it resolves whatever major the
+   dataset has actually reached, so this step cannot be wrong for a dataset
+   published past 1.x.
 5. **Switch on the rails** in the new repo's settings:
    - **Pages** → Build and deployment → Source: **GitHub Actions**.
    - **Ruleset** for `main`: require pull requests + required status checks
