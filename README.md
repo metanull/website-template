@@ -148,3 +148,11 @@ For real design work, use the live preview:
   build + test block, ESLint + `npm audit` report, locale PRs validate and
   auto-merge, Dependabot minor/patch bumps of the platform packages
   auto-merge, a weekly audit opens issues on findings.
+- Those callers pin an **exact** `viewer-workflows` version (`@v1.3.0`), never
+  a moving major tag. Do not "simplify" them to `@v1`: that tag is frozen at
+  v1.1.2 and force-moving it would deploy unverified CI to every website at
+  once. New releases arrive as a Dependabot pull request — the
+  `github-actions` ecosystem in `.github/dependabot.yml` covers
+  reusable-workflow refs — so this site's own CI validates a release before it
+  is adopted, and green minor/patch bumps auto-merge. The reasoning lives in
+  the viewer-workflows README's Versioning section.
