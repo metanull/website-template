@@ -10,8 +10,9 @@ combines three `@metanull` packages from GitHub Packages:
 | Package | Role |
 | --- | --- |
 | `@metanull/<dataset>-data` | the dataset (JSON + `manifest.json`) |
-| `@metanull/viewer-core` | application engine (routing, data access, i18n, shared views) |
+| `@metanull/viewer-core` | application engine (routing, data access, texts, language, shared views) |
 | `@metanull/viewer-layout` | page structure (`PageShell` + sections), themed via `theme/tokens.css` |
+| `@metanull/viewer-i18n` | the shared texts of this kind of website |
 
 ---
 
@@ -26,12 +27,24 @@ combines three `@metanull` packages from GitHub Packages:
    - `vite.config.js` — the `@inventory-data` alias path
    - `src/dataset.config.js` — `datasetPackage`, `siteName`, `navigation.headerTitle`
    - `index.html` — the `<title>`
+   - `locales/en.json` — the example text
 
    Leave the dataset dependency's *version* (`0.0.0-REPLACE-ME`) alone — step 4
    sets it. A half-configured copy cannot reach CI: npm itself refuses a
    dependency still named or versioned after a placeholder, and a `preinstall`
    check refuses the rest, naming the files you still have to edit.
-3. **Grant the new repo access to the dataset package.** On the package page
+3. **Say which shared texts this website receives**, by replacing two more
+   placeholders:
+   - `__SITE_CLASS__` — `standalone`, `gallery` or `exhibition`. It appears in
+     `package.json` (`viewerI18n.class`) and in `src/main.js`, which imports
+     that bundle. A product website (a whole virtual museum) is `standalone`.
+   - `__SITE_NAMESPACE__` — the name this website's own texts carry: one
+     lowercase word, no hyphens (`carpets`, `waterInIslam`). It appears in
+     `package.json` (`viewerI18n.namespace`) and in `locales/en.json`.
+
+   See [`viewer-i18n`](https://github.com/metanull/viewer-i18n) for what each
+   bundle contains.
+4. **Grant the new repo access to the dataset package.** On the package page
    (`github.com/users/metanull/packages/npm/package/<dataset>-data`) →
    **Package settings → Manage Actions access → Add repository** → the new
    repo, role **Read**. This is what lets CI install a **private** dataset
@@ -39,7 +52,7 @@ combines three `@metanull` packages from GitHub Packages:
    grant is UI-only, and only affects workflow runs *started after* it — a run
    that already failed with `403 permission_denied: read_package` has to be
    re-run.
-4. **Install the dataset.** On any machine logged in to GitHub Packages (or in
+5. **Install the dataset.** On any machine logged in to GitHub Packages (or in
    the Docker container below), run
 
    ```
@@ -50,21 +63,21 @@ combines three `@metanull` packages from GitHub Packages:
    `@latest` rather than a bare `npm install`: it resolves whatever major the
    dataset has actually reached, so this step cannot be wrong for a dataset
    published past 1.x.
-5. **Switch on the rails** in the new repo's settings:
+6. **Switch on the rails** in the new repo's settings:
    - **Pages** → Build and deployment → Source: **GitHub Actions**.
    - **Ruleset** for `main`: require pull requests + required status checks
      (copy the ruleset of an existing website repo).
    - **General → Allow auto-merge** (needed by the translator flow and Dependabot).
    - **CodeQL** (Security → Code scanning) and Dependabot alerts.
-6. **Grant `viewer-core` and `viewer-layout` Read on the dataset package** as
-   well (step 3). Their CI builds every website against the package being
-   released, so they install this dataset too.
+7. **Grant `viewer-core`, `viewer-layout` and `viewer-i18n` Read on the dataset
+   package** as well (step 4). Their CI builds every website against the
+   package being released, so they install this dataset too.
 
    There is nothing to register: a website is discovered from the
    `website-template` link GitHub records when the repository is created, so it
    becomes a downstream consumer the moment it exists.
-7. **Update `.github/CODEOWNERS`** with the real reviewers.
-8. **Merge the first PR** (the placeholder replacement). The deploy workflow
+8. **Update `.github/CODEOWNERS`** with the real reviewers.
+9. **Merge the first PR** (the placeholder replacement). The deploy workflow
    publishes the site to `https://metanull.github.io/<dataset>/`.
 
 The CI, deploy and audit workflows carry an
@@ -83,28 +96,38 @@ root deployment (custom domain), pass `base_path: /` to the deploy workflow.
 ## Translator — editing the website's texts
 
 You only need a GitHub account and a browser. The files under `locales/` hold
-the interface texts (menu labels, buttons, messages), one file per language —
-`en.json` is English, `fr.json` French, and so on. The museum content itself
-arrives already translated and is not edited here.
+**this website's own texts**, one file per language — `en.json` is English,
+`fr.json` French, and so on.
+
+Texts shared with the other websites of the same kind — the labels of an item
+sheet, the navigation, the buttons — are not here: they live in
+[`viewer-i18n`](https://github.com/metanull/viewer-i18n) and are edited there,
+the same way. This website can override any of them by writing the same entry
+name in its own file. The museum content itself arrives already translated and
+is not edited anywhere.
 
 1. **Open the folder.** Bookmark this link on the website's GitHub page:
    `locales/`. Click the language file you want to change.
 2. **Click the pencil** (✏️, top right of the file view). The file opens in an
    editable text box. Change only the text between the second pair of
-   quotation marks on a line — the part before the colon is the identifier
-   and must stay exactly as it is. Pieces in curly braces like `{page}` are
-   filled automatically — keep them, but you may move them within the
-   sentence.
+   quotation marks on a line — the part before the colon is the name of the
+   entry and must stay exactly as it is.
 3. **To start a new language**, open `en.json`, copy all of its content, then
    create the new file (Add file → Create new file) named with the two-letter
-   language code, e.g. `ar.json`, paste, and translate the texts.
+   language code, e.g. `ar.json`, paste, and translate the texts. A language
+   does not have to be complete: anything you have not translated shows in
+   English.
 4. **Click "Commit changes…" then "Propose changes".** GitHub asks nothing
    else — it saves your edit as a proposal.
 5. **Wait for the automatic check.** After a minute or two, the proposal page
    shows a green tick and your change goes live on the website by itself a few
-   minutes later. If something is off (a missing quote, a forgotten `{page}`),
-   a comment appears explaining in plain language what to fix — edit again on
-   the same page and the check reruns.
+   minutes later. If something is off, a comment appears explaining in plain
+   language what to fix — edit again on the same page and the check reruns.
+
+A text is **just text**, formatted with Markdown if you want: `**bold**`,
+`*italic*`, `[a link](https://example.org)`. It may not contain HTML tags, and
+it may not contain `{` or `}` — nothing is ever inserted into a text, so a
+number or a date is placed next to it by the website rather than inside it.
 
 ---
 
@@ -153,15 +176,22 @@ For real design work, use the live preview:
 
 - `src/dataset.config.js` is the website's whole declaration: dataset package,
   entities with list/detail routes, page shell + navigation, extra views.
-  `src/main.js` should not need edits.
+  `src/main.js` should not need edits after the two placeholders are replaced.
+- Texts come from two layers, merged in `src/main.js` with `mergeMessages` —
+  the `@metanull/viewer-i18n` bundle for this kind of website, then this
+  website's `locales/`, which wins. Read one with `$t('name')` in a template or
+  `useI18n()` in a script, and render Markdown with `<I18nText keypath="…">`;
+  see [`viewer-core`](https://github.com/metanull/viewer-core#texts). Entry
+  names must be **written out in full** at the call site — CI checks that every
+  one of them exists, and it can only check the names it can see.
 - Tests: `npm run test` runs `tests/smoke.test.js`, which mounts the app
   against the real data package. Add website-specific tests next to it.
 - Extra pages go into `src/views/` and are declared as `extraViews` in
   `dataset.config.js`.
 - CI (`.github/workflows/`) is a set of thin callers of
   [`metanull/viewer-workflows`](https://github.com/metanull/viewer-workflows);
-  build + test block, ESLint + `npm audit` report, locale PRs validate and
-  auto-merge, a weekly audit opens issues on findings.
+  build, test and texts block, ESLint + `npm audit` report, text-only PRs
+  validate and auto-merge, a weekly audit opens issues on findings.
 - Those callers pin an **exact** `viewer-workflows` version, never a moving
   major tag. Do not "simplify" them to `@v1`: that tag is frozen at v1.1.2 and
   force-moving it would deploy unverified CI to every website at once. New
