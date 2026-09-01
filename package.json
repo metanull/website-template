@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@metanull/__DATASET__-data": "0.0.0-REPLACE-ME",
-    "@metanull/viewer-core": "^1.1.0",
+    "@metanull/viewer-core": "^1.2.1",
     "@metanull/viewer-i18n": "^1.0.0",
     "@metanull/viewer-layout": "^2.0.0",
     "marked": "^18.0.0",
