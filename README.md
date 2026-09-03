@@ -177,6 +177,23 @@ For real design work, use the live preview:
 - `src/dataset.config.js` is the website's whole declaration: dataset package,
   entities with list/detail routes, page shell + navigation, extra views.
   `src/main.js` should not need edits after the two placeholders are replaced.
+- **Read every record and every per-language translation through
+  `useDataPackage()`** (see [`viewer-core`](https://github.com/metanull/viewer-core#readme)'s
+  README, "the only allowed way to read the data package") —
+  `loadEntity`, `loadTranslations`/`translations`/`tr`, `availableLanguages`.
+  A website that needs its own composable on top (most do, once it has more
+  than one entity to cross-reference) should wrap these, not reimplement
+  them. In particular, never resolve one language of a translations file with
+  a dynamic import built from a variable —
+  `` import(`@inventory-data/translations/items.${lang}.json`) `` — a bundler
+  cannot resolve that specifier statically, so it bundles every language of
+  that entity into the build eagerly instead of lazily loading the one asked
+  for; for a dataset with a large or many-language translation set this can
+  turn a several-second build into one that never finishes in CI. Four
+  websites reinvented `useDataPackage`'s translation loader independently
+  before it existed there; three others hit exactly this dynamic-import
+  fault. Both are why it now lives in `viewer-core` instead of being
+  something each website writes for itself.
 - Texts come from two layers, merged in `src/main.js` with `mergeMessages` —
   the `@metanull/viewer-i18n` bundle for this kind of website, then this
   website's `locales/`, which wins. Read one with `$t('name')` in a template or
