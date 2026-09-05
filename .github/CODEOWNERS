@@ -1,6 +1,12 @@
-# Placeholder team names — replace with the real teams or usernames of this
-# website (personal accounts have no teams; list usernames instead).
-/locales/ @metanull/translators
-/theme/ @metanull/webdesigners
-/src/ @metanull/developers
-/.github/ @metanull/admins
+# Who reviews what. Every path here resolves today, which is the point: a
+# CODEOWNERS entry naming something that does not exist is silently ignored,
+# so a file that looks reviewed by a team is reviewed by nobody.
+#
+# `@metanull` is a personal account and personal accounts have no teams. A
+# website owned by an organisation should replace each line below with that
+# organisation's teams (README, "Admin — creating a new website", step 8);
+# until then one owner reviews all four areas, which is the truth.
+/locales/ @metanull
+/theme/ @metanull
+/src/ @metanull
+/.github/ @metanull

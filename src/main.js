@@ -3,6 +3,7 @@ import { catalogues as sharedTexts } from '@metanull/viewer-i18n/__SITE_CLASS__'
 import '@metanull/viewer-layout/style.css'
 import '../theme/tokens.css'
 import '../theme/overrides.css'
+import './styles/site.css'
 import config from './dataset.config.js'
 
 // Every locales/<lang>.json holds this website's own texts, and may overload

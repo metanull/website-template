@@ -76,7 +76,11 @@ combines three `@metanull` packages from GitHub Packages:
    There is nothing to register: a website is discovered from the
    `website-template` link GitHub records when the repository is created, so it
    becomes a downstream consumer the moment it exists.
-8. **Update `.github/CODEOWNERS`** with the real reviewers.
+8. **Check `.github/CODEOWNERS`.** It ships owned by `@metanull`, the account
+   that owns the template — right for a website under a personal account, and
+   worth replacing with the owning teams under an organisation. A team that
+   does not exist is ignored without warning, so a wrong name here reads as
+   reviewed and is not.
 9. **Merge the first PR** (the placeholder replacement). The deploy workflow
    publishes the site to `https://metanull.github.io/<dataset>/`.
 
