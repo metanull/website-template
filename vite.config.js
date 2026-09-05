@@ -30,10 +30,16 @@ export default defineConfig({
     // and the dev server crashes on boot ("Cannot read properties of null"
     // in runtime-core). Listing them pre-bundles each exactly once, and the
     // excluded packages get the same copy.
-    include: ['vue', 'vue-router', 'marked'],
+    include: ['vue', 'vue-router'],
   },
   test: {
     environment: 'jsdom',
+    // The smoke test mounts the app, which lazily loads the home view and
+    // through it whatever the route declares. On a cold cache that is Vite's
+    // first transform of the whole view graph plus several megabytes of JSON,
+    // and it does not fit in vitest's 5 s default. The budget is for the
+    // machine, not the assertion.
+    testTimeout: 60000,
     server: {
       deps: {
         // viewer-core ships .vue source; Node cannot load it unless Vitest

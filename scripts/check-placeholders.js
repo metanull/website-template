@@ -39,8 +39,11 @@ const CONFIGURED_FILES = [
   'vite.config.js',
   'src/dataset.config.js',
   'src/main.js',
+  'src/SiteShell.vue',
+  'src/views/Home.vue',
   'index.html',
   'locales/en.json',
+  'tests/smoke.test.js',
 ]
 
 // Which shared texts this website receives, and the name its own entries carry.

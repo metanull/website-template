@@ -1,3 +1,6 @@
 {
-  "__SITE_NAMESPACE__.identity.title": "__DATASET__"
+  "__SITE_NAMESPACE__.identity.organisation": "Museum With No Frontiers",
+  "__SITE_NAMESPACE__.identity.title": "__DATASET__",
+  "__SITE_NAMESPACE__.identity.copyright": "© Museum With No Frontiers",
+  "__SITE_NAMESPACE__.home.intro": "Welcome to __DATASET__."
 }

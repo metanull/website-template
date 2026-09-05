@@ -25,9 +25,9 @@ combines three `@metanull` packages from GitHub Packages:
    (e.g. `islamicart`). The placeholder appears in exactly these places:
    - `package.json` — the `name` field and the `@metanull/__DATASET__-data` dependency
    - `vite.config.js` — the `@inventory-data` alias path
-   - `src/dataset.config.js` — `datasetPackage`, `siteName`, `navigation.headerTitle`
+   - `src/dataset.config.js` — `datasetPackage` and the `siteName` fallback
    - `index.html` — the `<title>`
-   - `locales/en.json` — the example text
+   - `locales/en.json` — the example texts
 
    Leave the dataset dependency's *version* (`0.0.0-REPLACE-ME`) alone — step 4
    sets it. A half-configured copy cannot reach CI: npm itself refuses a
@@ -40,7 +40,11 @@ combines three `@metanull` packages from GitHub Packages:
      that bundle. A product website (a whole virtual museum) is `standalone`.
    - `__SITE_NAMESPACE__` — the name this website's own texts carry: one
      lowercase word, no hyphens (`carpets`, `waterInIslam`). It appears in
-     `package.json` (`viewerI18n.namespace`) and in `locales/en.json`.
+     `package.json` (`viewerI18n.namespace`), `locales/en.json`,
+     `src/SiteShell.vue` and `src/views/Home.vue`.
+
+   `__SITE_CLASS__` also appears in `tests/smoke.test.js`, which imports the
+   same bundle `src/main.js` does.
 
    See [`viewer-i18n`](https://github.com/metanull/viewer-i18n) for what each
    bundle contains.
@@ -178,37 +182,87 @@ For real design work, use the live preview:
 
 ## Developer notes
 
-- `src/dataset.config.js` is the website's whole declaration: dataset package,
-  entities with list/detail routes, page shell + navigation, extra views.
-  `src/main.js` should not need edits after the two placeholders are replaced.
-- **Read every record and every per-language translation through
-  `useDataPackage()`** (see [`viewer-core`](https://github.com/metanull/viewer-core#readme)'s
-  README, "the only allowed way to read the data package") —
-  `loadEntity`, `loadTranslations`/`translations`/`tr`, `availableLanguages`.
-  A website that needs its own composable on top (most do, once it has more
-  than one entity to cross-reference) should wrap these, not reimplement
-  them. In particular, never resolve one language of a translations file with
-  a dynamic import built from a variable —
-  `` import(`@inventory-data/translations/items.${lang}.json`) `` — a bundler
-  cannot resolve that specifier statically, so it bundles every language of
-  that entity into the build eagerly instead of lazily loading the one asked
-  for; for a dataset with a large or many-language translation set this can
-  turn a several-second build into one that never finishes in CI. Four
-  websites reinvented `useDataPackage`'s translation loader independently
-  before it existed there; three others hit exactly this dynamic-import
-  fault. Both are why it now lives in `viewer-core` instead of being
-  something each website writes for itself.
-- Texts come from two layers, merged in `src/main.js` with `mergeMessages` —
+The platform has one architecture, and every website follows it. These are its
+rules; each one exists because a site that broke it cost something real. The
+pass that imposed them is metanull/inventory-app#1683, and the scaffold in this
+repository already obeys all ten — a new website starts compliant and stays
+that way by not undoing them.
+
+**1. `src/dataset.config.js` is the whole declaration.** Routes, languages,
+shell, media host, outbound links. Before the application mounts, the website
+reads nothing from its package but `manifest.json`. `src/main.js` needs no edit
+after the placeholders are replaced.
+
+**2. Records and translations come from viewer-core, lazily.** `entityRef`,
+`byId`, `loadTranslations`, `translations`, `tr` — see `src/composables/useCatalogue.js`,
+which is derivation over those and holds no state of its own. Rename it after
+the website. Nothing in `src/` imports `@inventory-data` directly, and nothing
+keeps a second cache. In particular, never resolve a language with an
+interpolated dynamic import: `` import(`@inventory-data/translations/items.${lang}.json`) ``
+cannot be resolved statically, so a bundler pulls in every language of that
+entity eagerly. On a large dataset that is a build which never finishes in CI —
+which is what happened, on three sites.
+
+**3. Glossary highlighting is the renderer's.** Pass `[{ id, spelling }]` to
+`md`/`mdInline` and viewer-core marks each occurrence while it parses. Wrapping
+a `<span>` into the text beforehand puts markup where a record's text should be,
+and it is escaped like any other raw HTML.
+
+**4. One site language, negotiated once.** `offeredLanguages()` in the config
+decides what the site offers: what the package declares for it, kept where the
+items carry content. Never derive it from `manifest.languages`, which lists
+every language the project ever touched — most with no translation file, so the
+switcher would offer languages whose pages are all English.
+
+**5. A record's language is not the site's.** An item sheet reads
+`useRecordLanguage(record, { entity: 'items' })`: the site language where the
+record carries it, English where it does not, the record's first language
+otherwise. The visitor may toggle it there, and that toggle never touches the
+site language or the address.
+
+**6. Every field is Markdown, escaped in one place.** `md`, `mdInline` and
+`mdStrip` in the composable are viewer-core's renderers and the only place a
+record becomes HTML. A tag that slipped past the importer appears on the page as
+the characters it is; when that happens the fix belongs in the importer, not in
+a view.
+
+**7. The shell is `PageShell`, from props.** `src/SiteShell.vue` supplies the
+menu and the lockup, because a label is a text and a text needs the running
+application. A shape PageShell cannot express is a request to
+[`viewer-layout`](https://github.com/metanull/viewer-layout), not a chrome
+component built here.
+
+**8. One routing convention.** Every route named, sections kebab-case, the page
+and all filters in the query, `meta.entities` naming what the view reads.
+Addresses the site used to publish go in `legacyRoutes`, redirect-only. The
+catch-all is viewer-core's; do not declare a second one.
+
+**9. A website owns its theme, and nothing else.** `theme/tokens.css` for the
+chrome, `src/styles/site.css` for the views' own content styles. Layout belongs
+to `viewer-layout`, behaviour to `viewer-core`.
+
+**10. CI is thin and pinned.** The five workflows below call
+`metanull/viewer-workflows` at an exact version.
+
+Two more things worth knowing before writing a page:
+
+- **Texts come from two layers**, merged in `src/main.js` with `mergeMessages`:
   the `@metanull/viewer-i18n` bundle for this kind of website, then this
   website's `locales/`, which wins. Read one with `$t('name')` in a template or
-  `useI18n()` in a script, and render Markdown with `<I18nText keypath="…">`;
-  see [`viewer-core`](https://github.com/metanull/viewer-core#texts). Entry
-  names must be **written out in full** at the call site — CI checks that every
-  one of them exists, and it can only check the names it can see.
-- Tests: `npm run test` runs `tests/smoke.test.js`, which mounts the app
-  against the real data package. Add website-specific tests next to it.
-- Extra pages go into `src/views/` and are declared as `extraViews` in
-  `dataset.config.js`.
+  `useI18n()` from `@metanull/viewer-core` in a script, and render Markdown with
+  `<I18nText keypath="…">`. Entry names must be **written out in full** at the
+  call site: CI checks that every one resolves, and it can only check the names
+  it can see. Nothing is ever interpolated into a text — a number or a date is
+  placed next to it by the view.
+- **`npm run test`** runs `tests/smoke.test.js`, which mounts the application
+  against the real data package and asserts the rules above that a test can
+  reach: named routes, declared entities, no generic entity pages, and the
+  language rule through `checkOfferedLanguages`. Add website-specific tests next
+  to it. There is no Markdown test here — the renderers are viewer-core's and
+  are tested there.
+
+And on rule 10, the pinned CI:
+
 - CI (`.github/workflows/`) is a set of thin callers of
   [`metanull/viewer-workflows`](https://github.com/metanull/viewer-workflows);
   build, test and texts block, ESLint + `npm audit` report, text-only PRs
