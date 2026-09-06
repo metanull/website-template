@@ -2,5 +2,8 @@
   "__SITE_NAMESPACE__.identity.organisation": "Museum With No Frontiers",
   "__SITE_NAMESPACE__.identity.title": "__DATASET__",
   "__SITE_NAMESPACE__.identity.copyright": "© Museum With No Frontiers",
-  "__SITE_NAMESPACE__.home.intro": "Welcome to __DATASET__."
+  "__SITE_NAMESPACE__.home.intro": "Welcome to __DATASET__.",
+  "__SITE_NAMESPACE__.home.catalogueText": "Browse every item by country and date.",
+  "__SITE_NAMESPACE__.home.itemOnDisplay": "Item on display",
+  "__SITE_NAMESPACE__.nav.catalogue": "Catalogue"
 }

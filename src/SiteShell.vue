@@ -8,7 +8,7 @@
 // Everything dataset.config.js puts in `navigation`, and the language the
 // application resolved, arrive as $attrs and pass straight through.
 import { computed } from 'vue'
-import { useI18n } from '@metanull/viewer-core'
+import { useI18n, useSection } from '@metanull/viewer-core'
 import { PageShell } from '@metanull/viewer-layout'
 
 const { t } = useI18n()
@@ -17,9 +17,13 @@ const { t } = useI18n()
 // text and a text is only available inside the application: `t` needs the
 // installed catalogue, and every name has to be written out where it is used
 // so `viewer-i18n-check` can see it. PageShell receives these links after
-// $attrs, so they win over anything the config still passes.
+// $attrs, so they win over anything the config still passes. Which entry is
+// active is the section the route declares (`meta.section`), read through
+// viewer-core's `useSection()` — never derived from the path.
+const section = useSection()
 const navLinks = computed(() => [
-  { label: t('core.nav.home'), href: '#/' },
+  { label: t('core.nav.home'), href: '#/', active: section.value === 'home' },
+  { label: t('__SITE_NAMESPACE__.nav.catalogue'), href: '#/catalogue', active: section.value === 'catalogue' },
 ])
 </script>
 

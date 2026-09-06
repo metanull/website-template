@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { createViewer, mergeMessages } from '@metanull/viewer-core'
+import { describe, expect, it, vi } from 'vitest'
+import { createViewer, loadEntities, mergeMessages } from '@metanull/viewer-core'
 import { checkOfferedLanguages } from '@metanull/viewer-core/testing'
 import { catalogues as sharedTexts } from '@metanull/viewer-i18n/__SITE_CLASS__'
 import ownTexts from '../locales/en.json'
@@ -10,8 +10,11 @@ import config from '../src/dataset.config.js'
 // nothing about the chrome — every text would render as its own name.
 const messages = mergeMessages(sharedTexts, { en: ownTexts })
 
-async function mountSite() {
-  window.location.hash = '#/'
+// Mounted on the address under test, as a visitor arrives: this is what
+// found viewer-core's deep-link defect (1.9.1), which a test pushing to the
+// page after mounting on `#/` never could.
+async function mountSite(hash = '#/') {
+  window.location.hash = hash
   const app = createViewer({ ...config, messages })
   const host = document.createElement('div')
   document.body.appendChild(host)
@@ -24,21 +27,51 @@ describe('website smoke test', () => {
   it('mounts against the configured data package', async () => {
     const { app, host } = await mountSite()
 
-    expect(host.textContent).toContain(config.siteName)
     expect(host.querySelector('.mwnf-page')).not.toBeNull()
 
-    // The website's own Home view (registered under the route name 'home')
-    // must replace viewer-core's generic home view.
+    // The composed landing page (named in `config.views.home`) replaces
+    // viewer-core's generic home view: the title, the cards and the record
+    // on display come from `config.home`, not from a page written here. The
+    // title is this website's own text, not the package's `siteName`.
     expect(host.querySelector('.vc-home')).toBeNull()
+    expect(host.querySelector('.mwnf-home__title').textContent.trim()).not.toBe('')
+    expect(host.querySelector('.mwnf-cards__card')).not.toBeNull()
 
     app.unmount()
   }, 20000)
+
+  // The two other pages a scaffolded website starts with, rendered against
+  // the data package by the composed views, each on an application mounted
+  // on that page's address — as a visitor arrives from a link. The results
+  // page lists records under the filter panel the catalogue spec declares;
+  // the record page shows a record's sheet under the labels the sheet spec
+  // declares.
+  it('renders the composed results page from the catalogue spec', async () => {
+    const { app, host } = await mountSite('#/catalogue')
+    await vi.waitFor(() => expect(host.querySelector('.mwnf-list__row')).not.toBeNull(), { timeout: 20000 })
+    expect(host.querySelector('.mwnf-filter')).not.toBeNull()
+    expect(host.querySelector('.mwnf-summary__count')).not.toBeNull()
+    app.unmount()
+  }, 60000)
+
+  it('renders the composed record page from the sheet spec', async () => {
+    const [items] = await loadEntities(['items'])
+    const { app, host } = await mountSite(`#/item/${encodeURIComponent(items[0].id)}`)
+    await vi.waitFor(() => expect(host.querySelector('.mwnf-sheet__label')).not.toBeNull(), { timeout: 20000 })
+    expect(host.querySelector('.mwnf-record__title').textContent.trim()).not.toBe('')
+    app.unmount()
+  }, 60000)
 
   it('declares every route by name, and leaves the catch-all to the router', () => {
     // A named route is what a view links to; a path written into a link is a
     // second declaration of the same address, and the two drift.
     expect(config.extraViews.every((r) => r.name)).toBe(true)
-    expect(config.extraViews.map((r) => r.name)).toContain('home')
+    expect(config.extraViews.map((r) => r.name)).toContain('catalogue')
+    expect(config.extraViews.map((r) => r.name)).toContain('item')
+    // The three slots are the composed views, not viewer-core's generic ones.
+    expect(Object.keys(config.views ?? {}).sort()).toEqual(['detail', 'home', 'list'])
+    // Every route belongs to a section the shell can name.
+    expect(config.extraViews.every((r) => typeof r.meta?.section === 'string')).toBe(true)
     // viewer-core adds `/:pathMatch(.*)*` itself. A second catch-all here
     // shadows it, and the unmatched-address page stops appearing.
     expect(config.extraViews.some((r) => r.path.includes('pathMatch'))).toBe(false)
