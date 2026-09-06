@@ -43,8 +43,12 @@ export default defineConfig({
     server: {
       deps: {
         // viewer-core ships .vue source; Node cannot load it unless Vitest
-        // processes the package instead of externalizing it.
-        inline: ['@metanull/viewer-core'],
+        // processes the package instead of externalizing it. viewer-layout
+        // is listed too because its composed views (`/views`) import
+        // viewer-core: loaded natively, they would reach the same .vue files
+        // through Node and fail, and would also get a second copy of
+        // viewer-core's records next to the inlined one.
+        inline: ['@metanull/viewer-core', '@metanull/viewer-layout'],
       },
     },
   },

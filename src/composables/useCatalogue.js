@@ -78,6 +78,89 @@ export function itemRoute(item) {
   return { name: 'item', params: { id: item.id } }
 }
 
+// ── The catalogue spec ─────────────────────────────────────────────────────
+//
+// What this website's results page filters on and how a row looks. The page
+// itself is viewer-layout's `CatalogueResultsView`, on viewer-core's engine;
+// this declaration is the whole of what the website decides: the facets and
+// what the URL carries for them, the date rule (decision D5 — `overlap`
+// tolerates a record with one date, `contain` drops it the moment a bound is
+// set; a website names its rule once and never merges the two), the page
+// size, the row. Every label is an entry name, written out, that the view
+// resolves. Add a facet by adding a line to `facets` and one to `controls`;
+// a filter the engine does not know is a `match(record, filters)` predicate,
+// and a control it does not draw goes in the view's `#filters` slot from a
+// component of your own.
+
+export const catalogue = {
+  entity: 'items',
+  facets: {
+    country: { field: 'country_id', label: countryLabel },
+  },
+  controls: [
+    { key: 'country', label: 'catalogue.facet.country', anyLabel: 'catalogue.facet.any' },
+    { key: 'begin', type: 'year', label: 'catalogue.facet.fromYear' },
+    { key: 'end', type: 'year', label: 'catalogue.facet.toYear' },
+  ],
+  filterTitle: 'catalogue.filter.heading',
+  dates: { mode: 'overlap', begin: 'begin', end: 'end' },
+  pageSize: 20,
+  variant: 'list',
+  recordRoute: 'item',
+  record: (item, { tr }) => {
+    const text = tr('items', item.id)
+    return {
+      id: item.id,
+      image: item.images?.[0]?.url ?? '',
+      imageAlt: itemLabel(item),
+      name: mdInline(text.name ?? item.internal_name ?? item.id),
+      meta: [countryLabel(item.country_id), text.dates, text.location].filter(Boolean),
+      badge: item.type ?? '',
+      to: itemRoute(item),
+    }
+  },
+}
+
+// ── The sheet spec ─────────────────────────────────────────────────────────
+//
+// Which fields a record shows, in what order, under which labels — the page
+// is viewer-layout's `RecordView`. `value` is a translation field, a record
+// field through a function, or a function of the context; `render` is
+// `inline` (the default), `block`, `link` or `custom` (handed to a slot named
+// after the key). `sections` are the prose blocks under the sheet. A field
+// with no value is dropped, so the list may be generous. Labels are the
+// shared `sheet.field.*` entries; add a website entry only for a label the
+// shared vocabulary does not have.
+
+export const sheet = {
+  entity: 'items',
+  translations: [],
+  fields: [
+    { key: 'location', label: 'sheet.field.location', value: (ctx) => [ctx.text.location, countryLabel(ctx.record.country_id)].filter(Boolean).join(', ') },
+    { key: 'holder', label: 'sheet.field.holdingMuseum', value: 'holder' },
+    { key: 'date', label: 'sheet.field.date', value: 'dates' },
+    { key: 'artists', label: 'sheet.field.artists', value: (ctx) => ctx.record.artist_names, join: ', ' },
+    { key: 'inventoryNumber', label: 'sheet.field.inventoryNumber', value: (ctx) => ctx.record.owner_reference },
+    { key: 'materials', label: 'sheet.field.materials', value: 'type' },
+    { key: 'dimensions', label: 'sheet.field.dimensions', value: 'dimensions' },
+    { key: 'provenance', label: 'sheet.field.provenance', value: 'provenance' },
+  ],
+  sections: [
+    { key: 'description', label: 'sheet.field.description', value: 'description' },
+    { key: 'bibliography', label: 'sheet.field.bibliography', value: 'bibliography' },
+  ],
+  layout: 'table',
+  citation: { project: (item) => item.project_key ?? '' },
+  related: { variant: 'list' },
+  back: { label: 'record.action.backToResults', to: { name: 'catalogue' } },
+}
+
+function countryLabel(countryId) {
+  if (!countryId) return ''
+  const country = countryById.value.get(countryId)
+  return mdStrip(tr('countries', countryId).name ?? country?.internal_name ?? countryId)
+}
+
 // ── Rendering ──────────────────────────────────────────────────────────────
 //
 // Every field of a record is Markdown, and these three are the only places one

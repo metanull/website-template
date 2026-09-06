@@ -40,7 +40,6 @@ const CONFIGURED_FILES = [
   'src/dataset.config.js',
   'src/main.js',
   'src/SiteShell.vue',
-  'src/views/Home.vue',
   'index.html',
   'locales/en.json',
   'tests/smoke.test.js',

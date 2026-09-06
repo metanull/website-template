@@ -41,7 +41,7 @@ combines three `@metanull` packages from GitHub Packages:
    - `__SITE_NAMESPACE__` — the name this website's own texts carry: one
      lowercase word, no hyphens (`carpets`, `waterInIslam`). It appears in
      `package.json` (`viewerI18n.namespace`), `locales/en.json`,
-     `src/SiteShell.vue` and `src/views/Home.vue`.
+     `src/SiteShell.vue` and `src/dataset.config.js`.
 
    `__SITE_CLASS__` also appears in `tests/smoke.test.js`, which imports the
    same bundle `src/main.js` does.
@@ -85,8 +85,21 @@ combines three `@metanull` packages from GitHub Packages:
    worth replacing with the owning teams under an organisation. A team that
    does not exist is ignored without warning, so a wrong name here reads as
    reviewed and is not.
-9. **Merge the first PR** (the placeholder replacement). The deploy workflow
-   publishes the site to `https://metanull.github.io/<dataset>/`.
+9. **Declare the catalogue and the sheet.** A scaffolded website already has
+   three real pages — a landing page, a results page and a record page — and
+   none of them is written here: they are the composed views of
+   `@metanull/viewer-layout/views`, driven by two declarations in
+   `src/composables/useCatalogue.js`. `catalogue` says what the results page
+   filters on (which facets, what the URL carries for them, the date rule,
+   the page size) and how a row looks; `sheet` says which fields a record
+   shows, in what order, under which `sheet.field.*` labels. Adjust both to
+   the dataset — a facet is one line in `facets` and one in `controls`, a
+   field is one line — and the cards and the record on display come from
+   `home` in `src/dataset.config.js`. A page that is not that shape is the
+   website's own component on the same content components, registered on
+   the same route name.
+10. **Merge the first PR** (the placeholder replacement). The deploy workflow
+    publishes the site to `https://metanull.github.io/<dataset>/`.
 
 The CI, deploy and audit workflows carry an
 `if: github.repository != 'metanull/website-template'` guard so the template
@@ -185,7 +198,7 @@ For real design work, use the live preview:
 The platform has one architecture, and every website follows it. These are its
 rules; each one exists because a site that broke it cost something real. The
 pass that imposed them is metanull/inventory-app#1683, and the scaffold in this
-repository already obeys all ten — a new website starts compliant and stays
+repository already obeys all eleven — a new website starts compliant and stays
 that way by not undoing them.
 
 **1. `src/dataset.config.js` is the whole declaration.** Routes, languages,
@@ -244,6 +257,18 @@ to `viewer-layout`, behaviour to `viewer-core`.
 **10. CI is thin and pinned.** The five workflows below call
 `metanull/viewer-workflows` at an exact version.
 
+**11. A page is composed of platform components, or is the site's own by
+choice.** The landing page, the results page and the record page are
+viewer-layout's `HomeView`, `CatalogueResultsView` and `RecordView`, named in
+`views` and driven by the `home`, `catalogue` and `sheet` declarations —
+what the page filters on, which fields it shows, under which labels. No page
+here carries a copy of the query state, the pagination, a facet builder, a
+date predicate, a field engine, a glossary handler or a result row: those are
+viewer-core's, once, and the components are viewer-layout's. A page whose
+shape the composed views do not have is a component of this website, written
+on the same content components and registered on the same route name; that
+is a choice made in the open, not a copy made by habit.
+
 Two more things worth knowing before writing a page:
 
 - **Texts come from two layers**, merged in `src/main.js` with `mergeMessages`:
@@ -256,10 +281,12 @@ Two more things worth knowing before writing a page:
   placed next to it by the view.
 - **`npm run test`** runs `tests/smoke.test.js`, which mounts the application
   against the real data package and asserts the rules above that a test can
-  reach: named routes, declared entities, no generic entity pages, and the
-  language rule through `checkOfferedLanguages`. Add website-specific tests next
-  to it. There is no Markdown test here — the renderers are viewer-core's and
-  are tested there.
+  reach: named routes with a section each, declared entities, no generic
+  entity pages, the three slots on the composed views, the landing page's
+  cards, the results page's rows and filter panel, the record page's sheet,
+  and the language rule through `checkOfferedLanguages`. Add website-specific
+  tests next to it. There is no Markdown test here — the renderers are
+  viewer-core's and are tested there.
 
 And on rule 10, the pinned CI:
 
