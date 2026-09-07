@@ -70,8 +70,6 @@ describe('website smoke test', () => {
     expect(config.extraViews.map((r) => r.name)).toContain('item')
     // The three slots are the composed views, not viewer-core's generic ones.
     expect(Object.keys(config.views ?? {}).sort()).toEqual(['detail', 'home', 'list'])
-    // Every route belongs to a section the shell can name.
-    expect(config.extraViews.every((r) => typeof r.meta?.section === 'string')).toBe(true)
     // viewer-core adds `/:pathMatch(.*)*` itself. A second catch-all here
     // shadows it, and the unmatched-address page stops appearing.
     expect(config.extraViews.some((r) => r.path.includes('pathMatch'))).toBe(false)
@@ -82,6 +80,16 @@ describe('website smoke test', () => {
     // the router loads what a route names before the view is created.
     for (const route of config.extraViews) {
       expect(Array.isArray(route.meta?.entities), route.name).toBe(true)
+    }
+  })
+
+  it('declares the section every route belongs to', () => {
+    // The shell reads `meta.section` (viewer-core's `useSection()`) to
+    // highlight the current section in the menu; a route without one would
+    // leave the menu silently unmarked rather than fail.
+    for (const route of config.extraViews) {
+      expect(typeof route.meta?.section, route.name).toBe('string')
+      expect(route.meta.section, route.name).not.toBe('')
     }
   })
 
