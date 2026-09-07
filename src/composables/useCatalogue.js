@@ -169,7 +169,9 @@ function countryLabel(countryId) {
 // belongs in the importer, not here.
 
 export function md(text, glossary) {
-  return renderBlock(text, { glossary })
+  // A record's line breaks are part of its authored text, so they must
+  // survive rendering the same way they do on every other site.
+  return renderBlock(text, { breaks: true, glossary })
 }
 
 export function mdInline(text, glossary) {
