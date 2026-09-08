@@ -1,5 +1,9 @@
-import { languageLabels, offeredLanguages, useDataPackage } from '@metanull/viewer-core'
-import { CatalogueResultsView, HomeView, RecordView } from '@metanull/viewer-layout/views'
+import {
+  languageLabels, mwnfLinks, offeredLanguages, sectionMeta, useDataPackage,
+} from '@metanull/viewer-core'
+import {
+  CatalogueResultsView, HomeView, RecordView, TextPageView,
+} from '@metanull/viewer-layout/views'
 import SiteShell from './SiteShell.vue'
 import { catalogue, sheet } from './composables/useCatalogue.js'
 
@@ -17,6 +21,19 @@ const { manifest } = useDataPackage()
 // A record may carry more languages than the site offers; its own page reads
 // those from `useRecordLanguage`, without touching the site language.
 const languages = offeredLanguages()
+
+// Every route names the section it belongs to and the entities its own view
+// reads on top of that; this website has no chrome entities every page loads
+// regardless, so `sectionMeta()` takes none.
+const meta = sectionMeta()
+
+// The About page: viewer-layout's TextPageView on one body entry and a link
+// back to the landing page — no records, no facets. A second static page
+// (credits, a legal notice) is one more spec and one more route the same way.
+const about = {
+  body: '__SITE_NAMESPACE__.about.body',
+  back: { label: 'core.action.back', to: { name: 'home' } },
+}
 
 export default {
   // The dataset package this website renders. Must match the alias in
@@ -77,11 +94,18 @@ export default {
 
   shell: SiteShell,
 
-  // Only what is not a text. Menu labels and the footer line are texts, so
-  // they are built in SiteShell.vue where the catalogue is installed; the
-  // language names below come from the data package, not from a translator.
+  // Everything @metanull/viewer-layout's SiteShell reads to build the menu,
+  // the language switcher, the header/footer link lists and the search
+  // submit — see its README, "Site shell". A label is an entry name, resolved
+  // by SiteShell itself (it installs the catalogue), so nothing here builds
+  // menu markup by hand any more.
   navigation: {
     languages: languageLabels(languages),
+    links: [
+      { section: 'home', label: 'core.nav.home', to: { name: 'home' } },
+      { section: 'catalogue', label: '__SITE_NAMESPACE__.nav.catalogue', to: { name: 'catalogue' } },
+      { section: 'about', label: '__SITE_NAMESPACE__.nav.about', to: { name: 'about' } },
+    ],
   },
 
   // Where this website's media lives. `mediaUrl(path, size)` builds an address
@@ -91,10 +115,10 @@ export default {
     legacyHost: 'https://images.museumwnf.org',
   },
 
-  // Every address this website links out to, by name.
-  links: {
-    portal: 'https://www.museumwnf.org',
-  },
+  // Every address this website links out to, by name. `mwnfLinks` is the
+  // portal and its siblings every website links to; a website adds to it
+  // rather than copying it (`links: { ...mwnfLinks, ownPage: '...' }`).
+  links: mwnfLinks,
 
   // The route map. Every route is named, sections are kebab-case, the page
   // and every filter live in the query, and each route says which section it
@@ -103,25 +127,32 @@ export default {
   // before the view is created and no page renders against records that are
   // not there yet.
   //
-  // The 'home' name is the slot `views.home` fills. The two routes below are
-  // the results page and the record page on the composed views, each driven
-  // by a spec from useCatalogue.js passed as route props: the catalogue spec
-  // says what the list filters on and how a row looks, the sheet spec says
-  // which fields a record shows under which labels.
+  // The 'home' name is the slot `views.home` fills. The routes below are the
+  // results page, the record page and the About page on the composed views,
+  // each driven by a spec passed as route props: the catalogue spec says what
+  // the list filters on and how a row looks, the sheet spec says which fields
+  // a record shows under which labels, and the about spec is one body entry.
   extraViews: [
     {
       path: '/catalogue',
       name: 'catalogue',
       component: CatalogueResultsView,
       props: { spec: catalogue },
-      meta: { section: 'catalogue', entities: ['items', 'countries'] },
+      meta: meta('catalogue', 'items', 'countries'),
     },
     {
       path: '/item/:id',
       name: 'item',
       component: RecordView,
       props: (route) => ({ spec: sheet, id: route.params.id }),
-      meta: { section: 'catalogue', entities: ['items', 'countries', 'partners'] },
+      meta: meta('catalogue', 'items', 'countries', 'partners'),
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: TextPageView,
+      props: { spec: about },
+      meta: meta('about'),
     },
   ],
 

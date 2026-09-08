@@ -86,18 +86,22 @@ combines three `@metanull` packages from GitHub Packages:
    does not exist is ignored without warning, so a wrong name here reads as
    reviewed and is not.
 9. **Declare the catalogue and the sheet.** A scaffolded website already has
-   three real pages — a landing page, a results page and a record page — and
-   none of them is written here: they are the composed views of
-   `@metanull/viewer-layout/views`, driven by two declarations in
-   `src/composables/useCatalogue.js`. `catalogue` says what the results page
-   filters on (which facets, what the URL carries for them, the date rule,
-   the page size) and how a row looks; `sheet` says which fields a record
-   shows, in what order, under which `sheet.field.*` labels. Adjust both to
-   the dataset — a facet is one line in `facets` and one in `controls`, a
-   field is one line — and the cards and the record on display come from
-   `home` in `src/dataset.config.js`. A page that is not that shape is the
-   website's own component on the same content components, registered on
-   the same route name.
+   four real pages — a landing page, a results page, a record page and an
+   About page — and none of them is written here: they are the composed
+   views of `@metanull/viewer-layout/views` (see "Composed views" below),
+   driven by declarations. The results and record pages read `catalogue` and
+   `sheet` from `src/composables/useCatalogue.js`: `catalogue` says what the
+   results page filters on (which facets, what the URL carries for them, the
+   date rule, the page size) and how a row looks; `sheet` says which fields a
+   record shows, in what order, under which `sheet.field.*` labels. Adjust
+   both to the dataset — a facet is one line in `facets` and one in
+   `controls`, a field is one line — and the cards and the record on display
+   come from `home` in `src/dataset.config.js`. The About page reads its own
+   `about` declaration, next to `home` in the same file; replace its
+   `__SITE_NAMESPACE__.about.body` text in `locales/en.json` with what the
+   dataset is and who published it. A page that is not one of the composed
+   views' shape is the website's own component on the same content
+   components, registered on the same route name.
 10. **Merge the first PR** (the placeholder replacement). The deploy workflow
     publishes the site to `https://metanull.github.io/<dataset>/`.
 
@@ -239,9 +243,12 @@ record becomes HTML. A tag that slipped past the importer appears on the page as
 the characters it is; when that happens the fix belongs in the importer, not in
 a view.
 
-**7. The shell is `PageShell`, from props.** `src/SiteShell.vue` supplies the
-menu and the lockup, because a label is a text and a text needs the running
-application. A shape PageShell cannot express is a request to
+**7. The shell is `@metanull/viewer-layout`'s `SiteShell`, from config.**
+`src/SiteShell.vue` only mounts it and fills the `#brand` slot with the
+header lockup, because a label is a text and a text needs the running
+application; the menu, the language switcher and the link lists are built by
+`SiteShell` itself from `config.navigation` (see the package's README, "Site
+shell"). A shape it cannot express is a request to
 [`viewer-layout`](https://github.com/metanull/viewer-layout), not a chrome
 component built here.
 
@@ -258,16 +265,46 @@ to `viewer-layout`, behaviour to `viewer-core`.
 `metanull/viewer-workflows` at an exact version.
 
 **11. A page is composed of platform components, or is the site's own by
-choice.** The landing page, the results page and the record page are
-viewer-layout's `HomeView`, `CatalogueResultsView` and `RecordView`, named in
-`views` and driven by the `home`, `catalogue` and `sheet` declarations —
-what the page filters on, which fields it shows, under which labels. No page
-here carries a copy of the query state, the pagination, a facet builder, a
-date predicate, a field engine, a glossary handler or a result row: those are
-viewer-core's, once, and the components are viewer-layout's. A page whose
-shape the composed views do not have is a component of this website, written
-on the same content components and registered on the same route name; that
-is a choice made in the open, not a copy made by habit.
+choice.** The landing page, the results page, the record page and the About
+page are viewer-layout's `HomeView`, `CatalogueResultsView`, `RecordView` and
+`TextPageView`, named in `views` (the first three) or on their own route (the
+last) and driven by a declaration — what the page filters on, which fields it
+shows, under which labels. No page here carries a copy of the query state,
+the pagination, a facet builder, a date predicate, a field engine, a glossary
+handler or a result row: those are viewer-core's, once, and the components
+are viewer-layout's. A page whose shape the composed views do not have is a
+component of this website, written on the same content components and
+registered on the same route name; that is a choice made in the open, not a
+copy made by habit.
+
+### Composed views
+
+Nine whole pages, made of viewer-layout's content components on viewer-core's
+engine, that a website names in a declaration instead of writing. This
+template already names three of them (`HomeView`, `CatalogueResultsView`,
+`RecordView`, in `config.views`) and one more on its own route
+(`TextPageView`, for the About page). The other five are there for the page
+a website adds next — an essay page, a partner list, a search form, a link
+list, a timeline — without writing one from scratch. Full declarations and
+slots are in [`viewer-layout`](https://github.com/metanull/viewer-layout)'s
+README, "Composed views".
+
+| View | One line |
+| --- | --- |
+| `HomeView` | The landing page: a title, an intro, section cards and one featured record. |
+| `CatalogueResultsView` | A filtered, paginated list or grid of one entity, from a facet/control spec. |
+| `RecordView` | One record's sheet: fields, sections, media, credits, related records. |
+| `EssayView` | A themed page in a tree (an exhibition theme, a chapter), with navigation, tabs and a picture panel. |
+| `LinkListView` | A titled list of link groups — further reading, external resources. |
+| `TextPageView` | One block of body text and an optional back link — this template's About page. |
+| `TimelineResultsView` | A filtered timeline of dated events, with an entrance-only mode for the form alone. |
+| `PartnerListView` | Partners grouped by country or tier, with an optional A-Z toggle. |
+| `SearchFormView` | An advanced-search entrance: keyword rows, facets or one-at-a-time radio choices. |
+
+A page whose shape none of these have is the website's own component, on the
+same content components (`@metanull/viewer-layout/content`), registered on
+the same route name — the escape hatch stays open; nothing about a composed
+view is mandatory.
 
 Two more things worth knowing before writing a page:
 
@@ -279,14 +316,16 @@ Two more things worth knowing before writing a page:
   call site: CI checks that every one resolves, and it can only check the names
   it can see. Nothing is ever interpolated into a text — a number or a date is
   placed next to it by the view.
-- **`npm run test`** runs `tests/smoke.test.js`, which mounts the application
-  against the real data package and asserts the rules above that a test can
-  reach: named routes with a section each, declared entities, no generic
-  entity pages, the three slots on the composed views, the landing page's
-  cards, the results page's rows and filter panel, the record page's sheet,
-  and the language rule through `checkOfferedLanguages`. Add website-specific
-  tests next to it. There is no Markdown test here — the renderers are
-  viewer-core's and are tested there.
+- **`npm run test`** runs `tests/smoke.test.js`, on the shared testing kit
+  (`mountSite`, `checkRoutes`, `checkSectionMeta`, `checkTextsRendered` from
+  `@metanull/viewer-core/testing`) rather than a local copy of the same
+  mounting and assertion code every website used to carry. It asserts the
+  rules above that a test can reach: named routes with a section each,
+  declared entities, no generic entity pages, the landing page's cards, the
+  results page's rows and filter panel, the record page's sheet, the About
+  page's body text, and the language rule through `checkOfferedLanguages`.
+  Add website-specific tests next to it. There is no Markdown test here — the
+  renderers are viewer-core's and are tested there.
 
 And on rule 10, the pinned CI:
 
