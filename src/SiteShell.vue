@@ -1,46 +1,34 @@
 <script setup>
-// The page structure, from PageShell's props. Every website of the platform
-// renders through this one component: header, banner, navigation, hyperlinks,
-// sponsors and footer are configuration, not markup, and a site that needs a
-// shape PageShell cannot express asks for it in @metanull/viewer-layout rather
-// than building its own chrome here.
+// The page structure is entirely @metanull/viewer-layout's SiteShell, which
+// composes PageShell from what `dataset.config.js` puts under `navigation`
+// and `links`: the menu, the header/footer link lists, the search submit and
+// the banner. Nothing here builds a menu or reads `useSection()` — that
+// belongs to the shared component, once, and a website that duplicates it
+// drifts from the platform the next time SiteShell gains a feature.
 //
-// Everything dataset.config.js puts in `navigation`, and the language the
-// application resolved, arrive as $attrs and pass straight through.
-import { computed } from 'vue'
-import { useI18n, useSection } from '@metanull/viewer-core'
-import { PageShell } from '@metanull/viewer-layout'
+// The one thing SiteShell cannot know is the header lockup: it is a text, and
+// a text is only available inside the application. `#brand` is the slot it
+// reserves for exactly that.
+import { useI18n } from '@metanull/viewer-core'
+import { SiteShell } from '@metanull/viewer-layout/components'
 
 const { t } = useI18n()
-
-// The menu is built here rather than in dataset.config.js because a label is a
-// text and a text is only available inside the application: `t` needs the
-// installed catalogue, and every name has to be written out where it is used
-// so `viewer-i18n-check` can see it. PageShell receives these links after
-// $attrs, so they win over anything the config still passes. Which entry is
-// active is the section the route declares (`meta.section`), read through
-// viewer-core's `useSection()` — never derived from the path.
-const section = useSection()
-const navLinks = computed(() => [
-  { label: t('core.nav.home'), href: '#/', active: section.value === 'home' },
-  { label: t('__SITE_NAMESPACE__.nav.catalogue'), href: '#/catalogue', active: section.value === 'catalogue' },
-])
 </script>
 
 <template>
-  <PageShell
+  <SiteShell
     v-bind="$attrs"
-    :nav-links="navLinks"
-    :footer-text="$t('__SITE_NAMESPACE__.identity.copyright')"
+    header-home="#/"
+    :footer-text="t('__SITE_NAMESPACE__.identity.copyright')"
   >
-    <template #header>
-      <a class="site-logo" href="#/">
-        <span class="site-logo-org">{{ $t('__SITE_NAMESPACE__.identity.organisation') }}</span>
-        <span class="site-logo-title">{{ $t('__SITE_NAMESPACE__.identity.title') }}</span>
-      </a>
+    <template #brand>
+      <span class="site-logo">
+        <span class="site-logo-org">{{ t('__SITE_NAMESPACE__.identity.organisation') }}</span>
+        <span class="site-logo-title">{{ t('__SITE_NAMESPACE__.identity.title') }}</span>
+      </span>
     </template>
     <slot />
-  </PageShell>
+  </SiteShell>
 </template>
 
 <style scoped>
@@ -50,8 +38,7 @@ const navLinks = computed(() => [
   display: flex;
   flex-direction: column;
   gap: 1px;
-  color: var(--header-fg);
-  text-decoration: none !important;
+  color: var(--mwnf-header-text);
 }
 .site-logo-org {
   font-size: 11px;
@@ -64,8 +51,5 @@ const navLinks = computed(() => [
   font-weight: 400;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-}
-.site-logo:hover {
-  color: var(--header-fg);
 }
 </style>
