@@ -2,7 +2,7 @@
 //
 // npm resolves the dependency tree *before* it runs `preinstall`, so this
 // script is not what stops a wholly unconfigured template: there, npm fails
-// first with a 404 on `@metanull/__DATASET__-data`. The cases divide up like
+// first with a 404 on `@museumwnf/__DATASET__-data`. The cases divide up like
 // this, and between them nothing gets through:
 //
 //   - dataset name still `__DATASET__`   -> npm's own 404, before this runs
@@ -106,9 +106,9 @@ lines.push(
   '  Then install the dataset itself, which writes the real version range and',
   '  the lockfile in one step:',
   '',
-  '      npm install @metanull/<dataset>-data@latest',
+  '      npm install @museumwnf/<dataset>-data@latest',
   '',
-  '  See README.md, "Admin — creating a new website", steps 2, 3 and 5.',
+  '  See README.md, "Admin — creating a new website", steps 2, 3 and 4.',
   '',
 )
 

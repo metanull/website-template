@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
-import { loadEntities, mergeMessages } from '@metanull/viewer-core'
+import { loadEntities, mergeMessages } from '@museumwnf/viewer-core'
 import {
   checkOfferedLanguages, checkRoutes, checkSectionMeta, checkTextsRendered, mountSite,
-} from '@metanull/viewer-core/testing'
-import { catalogues as sharedTexts } from '@metanull/viewer-i18n/__SITE_CLASS__'
+} from '@museumwnf/viewer-core/testing'
+import { catalogues as sharedTexts } from '@museumwnf/viewer-i18n/__SITE_CLASS__'
 import ownTexts from '../locales/en.json'
 import config from '../src/dataset.config.js'
 

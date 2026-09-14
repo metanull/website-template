@@ -1,9 +1,9 @@
 import {
   languageLabels, mwnfLinks, offeredLanguages, sectionMeta, useDataPackage,
-} from '@metanull/viewer-core'
+} from '@museumwnf/viewer-core'
 import {
   CatalogueResultsView, HomeView, RecordView, TextPageView,
-} from '@metanull/viewer-layout/views'
+} from '@museumwnf/viewer-layout/views'
 import SiteShell from './SiteShell.vue'
 import { catalogue, sheet } from './composables/useCatalogue.js'
 
@@ -38,7 +38,7 @@ const about = {
 export default {
   // The dataset package this website renders. Must match the alias in
   // vite.config.js and the dependency in package.json.
-  datasetPackage: '@metanull/__DATASET__-data',
+  datasetPackage: '@museumwnf/__DATASET__-data',
 
   // The website's name, as the package declares it. The fallback is what a
   // package predating `manifest.site` still shows.
@@ -94,7 +94,7 @@ export default {
 
   shell: SiteShell,
 
-  // Everything @metanull/viewer-layout's SiteShell reads to build the menu,
+  // Everything @museumwnf/viewer-layout's SiteShell reads to build the menu,
   // the language switcher, the header/footer link lists and the search
   // submit — see its README, "Site shell". A label is an entry name, resolved
   // by SiteShell itself (it installs the catalogue), so nothing here builds

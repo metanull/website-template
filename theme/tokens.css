@@ -3,7 +3,7 @@
  * point — change them freely; this file belongs to the webdesigner.
  *
  * Full token documentation with explanations:
- * node_modules/@metanull/viewer-layout/src/tokens.reference.css
+ * node_modules/@museumwnf/viewer-layout/src/tokens.reference.css
  */
 
 :root {
@@ -69,7 +69,7 @@
   --mwnf-footer-text-color: #555555;
   --mwnf-footer-text-size: 0.875rem;
 
-  /* ---------- Shared views (@metanull/viewer-core) ----------
+  /* ---------- Shared views (@museumwnf/viewer-core) ----------
    * The page shell already centers and pads the content section, so the
    * views inside it fill it edge to edge and inherit the fonts above. */
   --vc-font-body: var(--mwnf-font-body);
