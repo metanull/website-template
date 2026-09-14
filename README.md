@@ -346,3 +346,13 @@ And on rule 10, the pinned CI:
   third-party dependencies and GitHub Actions current, which both resolve fine.
   The procedure, and the reasoning, are in
   [MAINTENANCE.md](https://github.com/metanull/viewer-workflows/blob/main/MAINTENANCE.md).
+
+## Licence
+
+This package is Content of the MWNF Website under the [MWNF legal
+notice](https://www.museumwnf.org/about/legal-notice), which governs its use
+(non-commercial, personal, educational and scientific use is permitted, with
+attribution and mandatory reporting — see the notice for the full terms). The
+notice text also ships in this package as `LICENSE.md`. Every website
+scaffolded from this template inherits both the notice and the `license`
+field in `package.json`.
