@@ -2,24 +2,22 @@
 # so a release has time to be withdrawn before it reaches a site.
 version: 2
 updates:
-  # The @metanull platform packages are IGNORED here, and that is not a
-  # preference — Dependabot cannot read them at all.
+  # The @museumwnf platform packages (viewer-core, viewer-layout, viewer-i18n
+  # and the data packages) are IGNORED here, and that is no longer because
+  # Dependabot cannot read them — they publish publicly to npmjs, which it
+  # reads fine.
   #
-  # GitHub Packages requires a token for every npm install, including of a
-  # PUBLIC package (viewer-core and viewer-layout are public and still fail).
-  # CI works because the run's own `github.token` carries the package's
-  # "Manage Actions access" grant; Dependabot runs outside that grant and
-  # inherits neither it nor the committed .npmrc, so it reports
-  # `private_source_authentication_failure` for every @metanull dependency.
-  #
-  # One unresolvable dependency aborts the WHOLE npm job. Leaving them listed
-  # therefore blocked every THIRD-PARTY update too — the estate went a week
-  # with no npm pull request on any site, and five sites had never had one.
-  # Ignoring them is what lets vue, vite, eslint and the rest flow again.
-  #
-  # Nothing is lost by it: no @metanull bump has ever been delivered here.
-  # They are updated by hand (`npm update @metanull/...`) until the scheduled
-  # platform-update workflow lands.
+  # They are ignored because this scaffold is never itself a propagate
+  # target: `tools/propagate.mjs` in viewer-workflows opens one PR per
+  # website created from this template, bumping the range each site already
+  # depends on to a version its own CI has verified — but it does not touch
+  # website-template, which isn't a consumer of itself (see
+  # metanull/inventory-app docs/deployment/release-and-propagation.md,
+  # "Scaffold (website-template)"). The versions declared here are instead
+  # updated by hand, deliberately kept close to what the live sites have
+  # already adopted through that release-then-propagate run. An independent
+  # Dependabot bump here would drift ahead of that and could hand a newly
+  # scaffolded site a platform version no live site has run yet.
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -27,7 +25,7 @@ updates:
     cooldown:
       default-days: 7
     ignore:
-      - dependency-name: "@metanull/*"
+      - dependency-name: "@museumwnf/*"
 
   # The reusable workflows in metanull/viewer-workflows are pinned to an exact
   # version in .github/workflows/*.yml, never to a moving major tag. Dependabot
