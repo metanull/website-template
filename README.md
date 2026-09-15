@@ -1,7 +1,7 @@
 # website-template
 
 Template repository for MWNF websites. Every new website repo
-(`metanull/<dataset>`, public) is created **once** from this template — it is
+(`museumwithnofrontiers/<dataset>`, public) is created **once** from this template — it is
 never installed as a dependency and never updated in existing websites.
 
 A website is a light, static Vue 3 front-end for one published dataset. It
@@ -20,7 +20,7 @@ combines three `@museumwnf` packages from npmjs:
 
 1. **Use this template.** On this repo's GitHub page, click **Use this
    template → Create a new repository**. Name it after the dataset
-   (`metanull/<dataset>`), keep it **public**.
+   (`museumwithnofrontiers/<dataset>`), keep it **public**.
 2. **Replace every `__DATASET__` placeholder** with the dataset key
    (e.g. `islamicart`). The placeholder appears in exactly these places:
    - `package.json` — the `name` field and the `@museumwnf/__DATASET__-data` dependency
@@ -46,7 +46,7 @@ combines three `@museumwnf` packages from npmjs:
    `__SITE_CLASS__` also appears in `tests/smoke.test.js`, which imports the
    same bundle `src/main.js` does.
 
-   See [`viewer-i18n`](https://github.com/metanull/viewer-i18n) for what each
+   See [`viewer-i18n`](https://github.com/museumwithnofrontiers/viewer-i18n) for what each
    bundle contains.
 4. **Install the dataset.** `@museumwnf/<dataset>-data` publishes publicly to
    npmjs, so no login, token or package-access grant is needed — on any
@@ -96,14 +96,16 @@ combines three `@museumwnf` packages from npmjs:
    views' shape is the website's own component on the same content
    components, registered on the same route name.
 10. **Merge the first PR** (the placeholder replacement). The deploy workflow
-    publishes the site to `https://metanull.github.io/<dataset>/`.
+    publishes the site to `https://museumwithnofrontiers.github.io/<dataset>/`.
 
 The CI, deploy and audit workflows carry an
-`if: github.repository != 'metanull/website-template'` guard so the template
-itself — which has no lockfile and an unresolvable `__DATASET__` dependency —
-does not report failing checks. The condition is false in every repository
-created from the template, so the checks simply run; there is nothing to
-remove.
+`if: ${{ !endsWith(github.repository, '/website-template') }}` guard so the
+template itself — which has no lockfile and an unresolvable `__DATASET__`
+dependency — does not report failing checks. It checks the repository name
+rather than a fixed owner, so it keeps working across any future rename or
+move of the owning account; the condition is false only in a repository
+actually named `website-template`, so it is true in every repository created
+from the template and the checks simply run there.
 
 The deployed base path comes from the `BASE_PATH` environment variable at
 build time; the deploy workflow defaults it to `/<repo>/` for Pages. For a
@@ -119,7 +121,7 @@ You only need a GitHub account and a browser. The files under `locales/` hold
 
 Texts shared with the other websites of the same kind — the labels of an item
 sheet, the navigation, the buttons — are not here: they live in
-[`viewer-i18n`](https://github.com/metanull/viewer-i18n) and are edited there,
+[`viewer-i18n`](https://github.com/museumwithnofrontiers/viewer-i18n) and are edited there,
 the same way. This website can override any of them by writing the same entry
 name in its own file. The museum content itself arrives already translated and
 is not edited anywhere.
@@ -240,7 +242,7 @@ header lockup, because a label is a text and a text needs the running
 application; the menu, the language switcher and the link lists are built by
 `SiteShell` itself from `config.navigation` (see the package's README, "Site
 shell"). A shape it cannot express is a request to
-[`viewer-layout`](https://github.com/metanull/viewer-layout), not a chrome
+[`viewer-layout`](https://github.com/museumwithnofrontiers/viewer-layout), not a chrome
 component built here.
 
 **8. One routing convention.** Every route named, sections kebab-case, the page
@@ -253,7 +255,7 @@ chrome, `src/styles/site.css` for the views' own content styles. Layout belongs
 to `viewer-layout`, behaviour to `viewer-core`.
 
 **10. CI is thin and pinned.** The five workflows below call
-`metanull/viewer-workflows` at an exact version.
+`museumwithnofrontiers/viewer-workflows` at an exact version.
 
 **11. A page is composed of platform components, or is the site's own by
 choice.** The landing page, the results page, the record page and the About
@@ -277,7 +279,7 @@ template already names three of them (`HomeView`, `CatalogueResultsView`,
 (`TextPageView`, for the About page). The other five are there for the page
 a website adds next — an essay page, a partner list, a search form, a link
 list, a timeline — without writing one from scratch. Full declarations and
-slots are in [`viewer-layout`](https://github.com/metanull/viewer-layout)'s
+slots are in [`viewer-layout`](https://github.com/museumwithnofrontiers/viewer-layout)'s
 README, "Composed views".
 
 | View | One line |
@@ -321,7 +323,7 @@ Two more things worth knowing before writing a page:
 And on rule 10, the pinned CI:
 
 - CI (`.github/workflows/`) is a set of thin callers of
-  [`metanull/viewer-workflows`](https://github.com/metanull/viewer-workflows);
+  [`museumwithnofrontiers/viewer-workflows`](https://github.com/museumwithnofrontiers/viewer-workflows);
   build, test and texts block, ESLint + `npm audit` report, text-only PRs
   validate and auto-merge, a weekly audit opens issues on findings.
 - Those callers pin an **exact** `viewer-workflows` version, never a moving
@@ -342,7 +344,7 @@ And on rule 10, the pinned CI:
   site a platform version no live site has run yet. Dependabot still keeps
   third-party dependencies and GitHub Actions current, which both resolve
   fine. The procedure, and the reasoning, are in
-  [MAINTENANCE.md](https://github.com/metanull/viewer-workflows/blob/main/MAINTENANCE.md).
+  [MAINTENANCE.md](https://github.com/museumwithnofrontiers/viewer-workflows/blob/main/MAINTENANCE.md).
 
 ## Licence
 
