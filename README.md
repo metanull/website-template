@@ -5,14 +5,14 @@ Template repository for MWNF websites. Every new website repo
 never installed as a dependency and never updated in existing websites.
 
 A website is a light, static Vue 3 front-end for one published dataset. It
-combines three `@metanull` packages from GitHub Packages:
+combines three `@museumwnf` packages from npmjs:
 
 | Package | Role |
 | --- | --- |
-| `@metanull/<dataset>-data` | the dataset (JSON + `manifest.json`) |
-| `@metanull/viewer-core` | application engine (routing, data access, texts, language, shared views) |
-| `@metanull/viewer-layout` | page structure (`PageShell` + sections), themed via `theme/tokens.css` |
-| `@metanull/viewer-i18n` | the shared texts of this kind of website |
+| `@museumwnf/<dataset>-data` | the dataset (JSON + `manifest.json`) |
+| `@museumwnf/viewer-core` | application engine (routing, data access, texts, language, shared views) |
+| `@museumwnf/viewer-layout` | page structure (`PageShell` + sections), themed via `theme/tokens.css` |
+| `@museumwnf/viewer-i18n` | the shared texts of this kind of website |
 
 ---
 
@@ -23,7 +23,7 @@ combines three `@metanull` packages from GitHub Packages:
    (`metanull/<dataset>`), keep it **public**.
 2. **Replace every `__DATASET__` placeholder** with the dataset key
    (e.g. `islamicart`). The placeholder appears in exactly these places:
-   - `package.json` — the `name` field and the `@metanull/__DATASET__-data` dependency
+   - `package.json` — the `name` field and the `@museumwnf/__DATASET__-data` dependency
    - `vite.config.js` — the `@inventory-data` alias path
    - `src/dataset.config.js` — `datasetPackage` and the `siteName` fallback
    - `index.html` — the `<title>`
@@ -48,47 +48,40 @@ combines three `@metanull` packages from GitHub Packages:
 
    See [`viewer-i18n`](https://github.com/metanull/viewer-i18n) for what each
    bundle contains.
-4. **Grant the new repo access to the dataset package.** On the package page
-   (`github.com/users/metanull/packages/npm/package/<dataset>-data`) →
-   **Package settings → Manage Actions access → Add repository** → the new
-   repo, role **Read**. This is what lets CI install a **private** dataset
-   with its built-in `github.token`; no secret and no PAT is involved. The
-   grant is UI-only, and only affects workflow runs *started after* it — a run
-   that already failed with `403 permission_denied: read_package` has to be
-   re-run.
-5. **Install the dataset.** On any machine logged in to GitHub Packages (or in
-   the Docker container below), run
+4. **Install the dataset.** `@museumwnf/<dataset>-data` publishes publicly to
+   npmjs, so no login, token or package-access grant is needed — on any
+   machine, or in the Docker container below, run
 
    ```
-   npm install @metanull/<dataset>-data@latest
+   npm install @museumwnf/<dataset>-data@latest
    ```
 
    and commit `package-lock.json` — CI uses `npm ci` and needs it. Use
    `@latest` rather than a bare `npm install`: it resolves whatever major the
    dataset has actually reached, so this step cannot be wrong for a dataset
    published past 1.x.
-6. **Switch on the rails** in the new repo's settings:
+5. **Switch on the rails** in the new repo's settings:
    - **Pages** → Build and deployment → Source: **GitHub Actions**.
    - **Ruleset** for `main`: require pull requests + required status checks
      (copy the ruleset of an existing website repo).
    - **General → Allow auto-merge** (needed by the translator flow and Dependabot).
    - **CodeQL** (Security → Code scanning) and Dependabot alerts.
-7. **Grant `viewer-core`, `viewer-layout` and `viewer-i18n` Read on the dataset
-   package** as well (step 4). Their CI builds every website against the
-   package being released, so they install this dataset too.
 
-   There is nothing to register: a website is discovered from the
+   There is nothing to register with `viewer-core`/`viewer-layout`/`viewer-i18n`
+   or the dataset package for this: a website is discovered from the
    `website-template` link GitHub records when the repository is created, so it
-   becomes a downstream consumer the moment it exists.
-8. **Check `.github/CODEOWNERS`.** It ships owned by `@metanull`, the account
-   that owns the template — right for a website under a personal account, and
-   worth replacing with the owning teams under an organisation. A team that
+   becomes a downstream consumer of all four the moment it exists, and every
+   one of them is public — no access grant to request.
+6. **Check `.github/CODEOWNERS`.** It ships owned by `@metanull`, the GitHub
+   account that owns the template (unrelated to the `@museumwnf` npm scope
+   used above) — right for a website under a personal account, and worth
+   replacing with the owning teams under an organisation. A team that
    does not exist is ignored without warning, so a wrong name here reads as
    reviewed and is not.
-9. **Declare the catalogue and the sheet.** A scaffolded website already has
+7. **Declare the catalogue and the sheet.** A scaffolded website already has
    four real pages — a landing page, a results page, a record page and an
    About page — and none of them is written here: they are the composed
-   views of `@metanull/viewer-layout/views` (see "Composed views" below),
+   views of `@museumwnf/viewer-layout/views` (see "Composed views" below),
    driven by declarations. The results and record pages read `catalogue` and
    `sheet` from `src/composables/useCatalogue.js`: `catalogue` says what the
    results page filters on (which facets, what the URL carries for them, the
@@ -169,10 +162,8 @@ For real design work, use the live preview:
    - Install **Docker Desktop** (docker.com) and **GitHub Desktop**
      (desktop.github.com), each with default settings.
    - In GitHub Desktop: File → Clone repository → pick this website's repo.
-   - Sign in to GitHub Packages once, in a terminal:
-     `npm login --registry=https://npm.pkg.github.com --scope=@metanull`.
-     That login stays on your own computer, and the preview reads it. Nothing
-     in this repository holds a token.
+   - No npm login is needed: every `@museumwnf` package installs anonymously
+     from npmjs. Nothing in this repository holds a token.
 2. **Start the preview:** open a terminal in the folder (GitHub Desktop:
    Repository → Open in Command Prompt) and run:
 
@@ -243,7 +234,7 @@ record becomes HTML. A tag that slipped past the importer appears on the page as
 the characters it is; when that happens the fix belongs in the importer, not in
 a view.
 
-**7. The shell is `@metanull/viewer-layout`'s `SiteShell`, from config.**
+**7. The shell is `@museumwnf/viewer-layout`'s `SiteShell`, from config.**
 `src/SiteShell.vue` only mounts it and fills the `#brand` slot with the
 header lockup, because a label is a text and a text needs the running
 application; the menu, the language switcher and the link lists are built by
@@ -302,23 +293,23 @@ README, "Composed views".
 | `SearchFormView` | An advanced-search entrance: keyword rows, facets or one-at-a-time radio choices. |
 
 A page whose shape none of these have is the website's own component, on the
-same content components (`@metanull/viewer-layout/content`), registered on
+same content components (`@museumwnf/viewer-layout/content`), registered on
 the same route name — the escape hatch stays open; nothing about a composed
 view is mandatory.
 
 Two more things worth knowing before writing a page:
 
 - **Texts come from two layers**, merged in `src/main.js` with `mergeMessages`:
-  the `@metanull/viewer-i18n` bundle for this kind of website, then this
+  the `@museumwnf/viewer-i18n` bundle for this kind of website, then this
   website's `locales/`, which wins. Read one with `$t('name')` in a template or
-  `useI18n()` from `@metanull/viewer-core` in a script, and render Markdown with
+  `useI18n()` from `@museumwnf/viewer-core` in a script, and render Markdown with
   `<I18nText keypath="…">`. Entry names must be **written out in full** at the
   call site: CI checks that every one resolves, and it can only check the names
   it can see. Nothing is ever interpolated into a text — a number or a date is
   placed next to it by the view.
 - **`npm run test`** runs `tests/smoke.test.js`, on the shared testing kit
   (`mountSite`, `checkRoutes`, `checkSectionMeta`, `checkTextsRendered` from
-  `@metanull/viewer-core/testing`) rather than a local copy of the same
+  `@museumwnf/viewer-core/testing`) rather than a local copy of the same
   mounting and assertion code every website used to carry. It asserts the
   rules above that a test can reach: named routes with a section each,
   declared entities, no generic entity pages, the landing page's cards, the
@@ -339,12 +330,14 @@ And on rule 10, the pinned CI:
   releases arrive as a Dependabot pull request — the `github-actions` ecosystem
   covers reusable-workflow refs — so this site's own CI validates a release
   before it is adopted, and green minor/patch bumps auto-merge.
-- **`@metanull` npm packages are not managed by Dependabot.** GitHub Packages
-  requires a token for every install, including of a public package, and
-  Dependabot has no route to one — so `.github/dependabot.yml` ignores that
-  scope and it is propagated by the operator instead. Dependabot still keeps
-  third-party dependencies and GitHub Actions current, which both resolve fine.
-  The procedure, and the reasoning, are in
+- **`@museumwnf` npm packages are not managed by Dependabot yet.** They now
+  publish publicly to npmjs, which Dependabot can read without a token — the
+  GitHub Packages restriction that used to block it is gone — but
+  `.github/dependabot.yml` still ignores the scope and it is still propagated
+  by the operator instead, pending metanull/inventory-app#1722 (which moves
+  Dependabot config for these packages in lockstep across every consumer
+  repo). Dependabot still keeps third-party dependencies and GitHub Actions
+  current, which both resolve fine. The procedure, and the reasoning, are in
   [MAINTENANCE.md](https://github.com/metanull/viewer-workflows/blob/main/MAINTENANCE.md).
 
 ## Licence

@@ -1,6 +1,6 @@
 import {
   byId, entityRef, renderBlock, renderInline, renderPlain, useDataPackage,
-} from '@metanull/viewer-core'
+} from '@museumwnf/viewer-core'
 
 // This website's records, read the one way every website reads them: through
 // viewer-core, lazily. Each entity is a shared ref that stays `null` until a

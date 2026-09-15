@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 
-// This is the shape of @metanull/viewer-core/testing's `defineViewerConfig()`,
+// This is the shape of @museumwnf/viewer-core/testing's `defineViewerConfig()`,
 // kept here rather than called: that helper sits in the same barrel
 // (`testing/index.js`) as `mountSite`, which imports `createViewer.js`, which
 // imports the raw `AppRoot.vue`. Vite and Vitest load `vite.config.js` with
@@ -10,11 +10,11 @@ import { defineConfig } from 'vite'
 // barrel from here fails immediately with
 // `ERR_UNKNOWN_FILE_EXTENSION` on `AppRoot.vue` — reproducible with nothing
 // but Node itself:
-// `node --input-type=module -e "import('@metanull/viewer-core/testing')"`.
+// `node --input-type=module -e "import('@museumwnf/viewer-core/testing')"`.
 // Filed as metanull/viewer-core#86. `tests/smoke.test.js` imports the same
 // barrel safely, because Vitest loads test files through its own transform
 // pipeline rather than plain Node. Switch this back to
-// `...defineViewerConfig({ dataPackage: '@metanull/__DATASET__-data', plugins: [vue()] })`
+// `...defineViewerConfig({ dataPackage: '@museumwnf/__DATASET__-data', plugins: [vue()] })`
 // once the package exposes it somewhere that does not pull in `.vue`.
 export default defineConfig({
   // GitHub Pages serves the site under /<repo>/; the deploy workflow sets
@@ -25,7 +25,7 @@ export default defineConfig({
     alias: {
       // viewer-core reads every JSON of the data package through this alias.
       '@inventory-data': fileURLToPath(
-        new URL('./node_modules/@metanull/__DATASET__-data', import.meta.url),
+        new URL('./node_modules/@museumwnf/__DATASET__-data', import.meta.url),
       ),
     },
   },
@@ -36,7 +36,7 @@ export default defineConfig({
     // The /i18n subpath is listed as well as the package: Vite pre-bundles a
     // subpath as its own entry, and a second copy of the text module would be
     // a second, empty set of texts for whatever imported it.
-    exclude: ['@metanull/viewer-core', '@metanull/viewer-core/i18n', '@metanull/viewer-layout'],
+    exclude: ['@museumwnf/viewer-core', '@museumwnf/viewer-core/i18n', '@museumwnf/viewer-layout'],
     // The runtime deps reach the browser through those excluded packages, so
     // the dev-server dependency scan cannot discover them until the website's
     // own views import them directly. Without this list a late discovery
@@ -62,7 +62,7 @@ export default defineConfig({
         // viewer-core: loaded natively, they would reach the same .vue files
         // through Node and fail, and would also get a second copy of
         // viewer-core's records next to the inlined one.
-        inline: ['@metanull/viewer-core', '@metanull/viewer-layout'],
+        inline: ['@museumwnf/viewer-core', '@museumwnf/viewer-layout'],
       },
     },
   },

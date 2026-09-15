@@ -1,5 +1,5 @@
 <script setup>
-// The page structure is entirely @metanull/viewer-layout's SiteShell, which
+// The page structure is entirely @museumwnf/viewer-layout's SiteShell, which
 // composes PageShell from what `dataset.config.js` puts under `navigation`
 // and `links`: the menu, the header/footer link lists, the search submit and
 // the banner. Nothing here builds a menu or reads `useSection()` — that
@@ -9,8 +9,8 @@
 // The one thing SiteShell cannot know is the header lockup: it is a text, and
 // a text is only available inside the application. `#brand` is the slot it
 // reserves for exactly that.
-import { useI18n } from '@metanull/viewer-core'
-import { SiteShell } from '@metanull/viewer-layout/components'
+import { useI18n } from '@museumwnf/viewer-core'
+import { SiteShell } from '@museumwnf/viewer-layout/components'
 
 const { t } = useI18n()
 </script>
