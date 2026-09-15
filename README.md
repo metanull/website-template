@@ -72,13 +72,7 @@ combines three `@museumwnf` packages from npmjs:
    `website-template` link GitHub records when the repository is created, so it
    becomes a downstream consumer of all four the moment it exists, and every
    one of them is public — no access grant to request.
-6. **Check `.github/CODEOWNERS`.** It ships owned by `@metanull`, the GitHub
-   account that owns the template (unrelated to the `@museumwnf` npm scope
-   used above) — right for a website under a personal account, and worth
-   replacing with the owning teams under an organisation. A team that
-   does not exist is ignored without warning, so a wrong name here reads as
-   reviewed and is not.
-7. **Declare the catalogue and the sheet.** A scaffolded website already has
+6. **Declare the catalogue and the sheet.** A scaffolded website already has
    four real pages — a landing page, a results page, a record page and an
    About page — and none of them is written here: they are the composed
    views of `@museumwnf/viewer-layout/views` (see "Composed views" below),
@@ -95,7 +89,7 @@ combines three `@museumwnf` packages from npmjs:
    dataset is and who published it. A page that is not one of the composed
    views' shape is the website's own component on the same content
    components, registered on the same route name.
-10. **Merge the first PR** (the placeholder replacement). The deploy workflow
+7. **Merge the first PR** (the placeholder replacement). The deploy workflow
     publishes the site to `https://museumwithnofrontiers.github.io/<dataset>/`.
 
 The CI, deploy and audit workflows carry an
