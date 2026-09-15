@@ -330,14 +330,18 @@ And on rule 10, the pinned CI:
   releases arrive as a Dependabot pull request — the `github-actions` ecosystem
   covers reusable-workflow refs — so this site's own CI validates a release
   before it is adopted, and green minor/patch bumps auto-merge.
-- **`@museumwnf` npm packages are not managed by Dependabot yet.** They now
-  publish publicly to npmjs, which Dependabot can read without a token — the
-  GitHub Packages restriction that used to block it is gone — but
-  `.github/dependabot.yml` still ignores the scope and it is still propagated
-  by the operator instead, pending metanull/inventory-app#1722 (which moves
-  Dependabot config for these packages in lockstep across every consumer
-  repo). Dependabot still keeps third-party dependencies and GitHub Actions
-  current, which both resolve fine. The procedure, and the reasoning, are in
+- **`@museumwnf` npm packages are deliberately not managed by Dependabot.**
+  They publish publicly to npmjs, which Dependabot can read without a token —
+  the GitHub Packages restriction that used to block it is gone — but
+  `.github/dependabot.yml` still ignores the scope, and it stays that way by
+  design: website-template is not a propagate target (a new site's platform
+  versions are set once, at creation, from what live sites already run), so
+  the versions declared here are updated by hand instead, deliberately kept
+  close to what the release-then-propagate run has already put on live
+  sites. An independent Dependabot bump here could hand a newly scaffolded
+  site a platform version no live site has run yet. Dependabot still keeps
+  third-party dependencies and GitHub Actions current, which both resolve
+  fine. The procedure, and the reasoning, are in
   [MAINTENANCE.md](https://github.com/metanull/viewer-workflows/blob/main/MAINTENANCE.md).
 
 ## Licence
